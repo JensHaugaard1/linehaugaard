@@ -35,3 +35,22 @@ touchArea.addEventListener('touchend', e => {
 }, {passive:true});
 
 show(0);
+
+// --- Mobile menu toggle ---
+const menuToggle = document.querySelector('.menu-toggle');
+const menu = document.querySelector('#primary-menu');
+
+if (menuToggle && menu) {
+  menuToggle.addEventListener('click', () => {
+    const isOpen = menu.classList.toggle('open');
+    menuToggle.setAttribute('aria-expanded', String(isOpen));
+  });
+
+  // Luk når der klikkes på et link (bedre UX)
+  menu.querySelectorAll('a[href^="#"]').forEach(a => {
+    a.addEventListener('click', () => {
+      menu.classList.remove('open');
+      menuToggle.setAttribute('aria-expanded', 'false');
+    });
+  });
+}

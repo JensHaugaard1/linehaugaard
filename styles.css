@@ -52,3 +52,54 @@ a:focus,button:focus,input:focus,textarea:focus{outline:2px solid var(--sage);ou
 html {
   scroll-behavior: smooth;
 }
+/* keep CTA on one line on all sizes */
+.menu .cta { white-space: nowrap; }
+
+/* Hide toggle on desktop */
+.menu-toggle { display: none; }
+
+/* Mobile layout */
+@media (max-width: 640px) {
+  .nav { position: relative; }
+
+  .menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px; height: 40px;
+    border-radius: 8px;
+    border: 1px solid rgba(0,0,0,.1);
+    background: #fff;
+    font-size: 20px;
+    color: var(--forest);
+  }
+
+  /* Collapsible menu panel */
+  .menu {
+    position: absolute;
+    top: 82px;            /* lige under header-linjen */
+    right: 0;
+    background: rgba(250,247,242,.98);
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: var(--shadow);
+    border-radius: 12px;
+    padding: 12px;
+    display: none;        /* skjult til toggle */
+    flex-direction: column;
+    gap: 10px;
+    min-width: 240px;
+  }
+  .menu.open { display: flex; }
+
+  /* lidt strammere CTA på mobil */
+  .menu .cta {
+    display: inline-block;
+    text-align: right;
+    padding: 10px px;
+    font-weight: 700;
+    border-radius: 999px;
+  }
+
+  /* Brand + toggle i række, skjul desktop-gap */
+  .container.nav { gap: 12px; }
+}
