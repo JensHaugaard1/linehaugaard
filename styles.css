@@ -14,15 +14,38 @@ body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,R
 .hero{padding:84px 0 40px}
 .compact-top{padding-top:40px}
 .hero-inner{text-align:left}
-.two-col{display:grid;grid-template-columns:1.2fr .8fr;gap:28px;align-items:center}
-@media (max-width: 900px){ .two-col{grid-template-columns:1fr} .hero-photo-wrap{order:-1; justify-self:center} }
+.two-col{display:grid;grid-template-columns:1.2fr .8fr;gap:100px;align-items:center}
+@media (max-width: 900px){ .two-col{grid-template-columns:1fr} .hero-photo-wrap{order:1; justify-self:center} }
+/* --- Force side-by-side on mobile, tighter spacing --- */
+@media (max-width: 640px) {
+  /* Overrider evt. tidligere stacking-regel */
+  .two-col {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 140px; /* tekst | lille cirkel */
+    align-items: start;
+    gap: 12px; /* mindre afstand mellem tekst og billede */
+  }
+
+  /* Sørg for at billedet er til højre (ikke reorder til -1) */
+  .hero-photo-wrap {
+    order: initial;
+    justify-self: end;
+    align-self: start;
+    
+  }
+
+  
+
+ 
+}
+
 h1{font-size:clamp(32px,5vw,56px);line-height:1.05;margin:0 0 12px;letter-spacing:-.5px}
 .lead{font-size:clamp(16px,2.2vw,20px);color:var(--slate);margin:0 0 18px}
 .meta{color:var(--slate);opacity:.9;margin-top:10px;font-size:14px}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
 .hero-photo {
-  width: 375px;              /* fast størrelse så den kan være perfekt cirkel */
-  height: 375px;
+  width: 300px;              /* fast størrelse så den kan være perfekt cirkel */
+  height: 300px;
   border-radius: 50%;        /* gør billedet cirkulært */
   object-fit: cover;         /* zoomer beskæring så det fylder cirklen pænt */
   box-shadow: var(--shadow);
@@ -67,7 +90,7 @@ html {
 .menu-toggle { display: none; }
 
 /* Mobile layout */
-@media (max-width: 640px) {
+@media (max-width: 900px) {
   .nav { position: relative; }
 
   .menu-toggle {
@@ -110,27 +133,49 @@ html {
 
   /* Brand + toggle i række, skjul desktop-gap */
   .container.nav { gap: 12px; }
+  /* --- Hero: tekst og billede side om side --- */
+.two-col {
+  display: grid;
+  grid-template-columns: 1.4fr auto; /* lidt mere plads til tekst */
+  align-items: center;
+  gap: 30px; /* mindre end før */
+}
 }
 
-/* --- Mobile adjustments for hero section --- */
-@media (max-width: 720px) {
-  /* mindre luft over billedet */
-  .hero {
-    padding-top: 32px; /* tidligere 84px – justeret */
-    margin-bottom: -44px;
-  }
 
-  /* billedet større på mobil */
+
+
+
+/* --- Mobil: mindre billede og endnu tættere layout --- */
+@media (max-width: 900px) {
+
+/* Billedet som cirkel */
+.hero-photo {
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  object-fit: cover;
+  float: right;
+  shape-outside: circle(50%);
+  margin-left: 16px; /* tættere tekst */
+  box-shadow: var(--shadow);
+}
   .hero-photo {
-    width: 85svw;      /* større cirkel end desktop */
-    height: 85svw;
+    width: 175px;
+    height: 175px;
+    shape-outside: circle(50%);
+    float: right;       /* lader teksten flyde rundt om billedet */
+    margin: 0 0 8px 12px; /* mindre afstand */
   }
 
-  /* lidt tættere på teksten */
-  .hero-photo-wrap {
-    margin-bottom: 16px;
+  .hero {
+    padding-top: px;
+    margin-bottom: -36px;
   }
 
-
+  .hero-copy h1 {
+    margin-top: 0;
+  }
 }
+
 
