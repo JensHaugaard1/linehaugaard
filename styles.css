@@ -20,7 +20,15 @@ h1{font-size:clamp(32px,5vw,56px);line-height:1.05;margin:0 0 12px;letter-spacin
 .lead{font-size:clamp(16px,2.2vw,20px);color:var(--slate);margin:0 0 18px}
 .meta{color:var(--slate);opacity:.9;margin-top:10px;font-size:14px}
 .hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
-.hero-photo{width:100%;max-width:420px;border-radius:18px;box-shadow:var(--shadow);display:block;object-fit:cover}
+.hero-photo {
+  width: 375px;              /* fast størrelse så den kan være perfekt cirkel */
+  height: 375px;
+  border-radius: 50%;        /* gør billedet cirkulært */
+  object-fit: cover;         /* zoomer beskæring så det fylder cirklen pænt */
+  box-shadow: var(--shadow);
+  display: block;
+  margin: 0 auto;            /* centrerer billedet */
+}
 .btn-primary{display:inline-block;padding:12px 18px;background:var(--sage);color:var(--white);border-radius:12px;text-decoration:none;font-weight:600;box-shadow:var(--shadow)}
 .btn-primary:hover{filter:brightness(.95)}
 .btn-ghost{display:inline-block;padding:12px 18px;background:transparent;color:var(--forest);border-radius:12px;text-decoration:none;border:1px solid rgba(0,0,0,.1)}
@@ -103,3 +111,26 @@ html {
   /* Brand + toggle i række, skjul desktop-gap */
   .container.nav { gap: 12px; }
 }
+
+/* --- Mobile adjustments for hero section --- */
+@media (max-width: 720px) {
+  /* mindre luft over billedet */
+  .hero {
+    padding-top: 32px; /* tidligere 84px – justeret */
+    margin-bottom: -44px;
+  }
+
+  /* billedet større på mobil */
+  .hero-photo {
+    width: 85svw;      /* større cirkel end desktop */
+    height: 85svw;
+  }
+
+  /* lidt tættere på teksten */
+  .hero-photo-wrap {
+    margin-bottom: 16px;
+  }
+
+
+}
+
