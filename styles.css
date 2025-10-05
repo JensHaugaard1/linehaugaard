@@ -1,181 +1,364 @@
-:root{ --sand:#FAF7F2; --clay:#E8DED2; --sage:#6F8F7A; --forest:#163A3A; --slate:#2F3E46; --white:#fff; --radius:14px; --shadow:0 6px 20px rgba(0,0,0,.08); }
-*{box-sizing:border-box}
-html,body{height:100%}
-body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial; color:var(--forest); background:var(--sand)}
-.container{width:min(1100px,92%);margin:0 auto}
-.container.narrow{width:min(820px,92%)}
-.site-header{position:sticky;top:0;z-index:40;backdrop-filter:saturate(120%) blur(6px);background:rgba(250,247,242,.9);border-bottom:1px solid rgba(0,0,0,.06)}
-.nav{display:flex;align-items:center;justify-content:space-between;padding:14px 0}
-.brand{font-weight:700;letter-spacing:.4px}
-.menu{display:flex;gap:18px;align-items:center}
-.menu a{text-decoration:none;color:var(--slate);font-weight:500}
-.menu a:hover{color:var(--forest)}
-.menu .cta{padding:10px 14px;background:var(--sage);color:var(--white);border-radius:999px;box-shadow:var(--shadow)}
-.hero{padding:84px 0 40px}
-.compact-top{padding-top:40px}
-.hero-inner{text-align:left}
-.two-col{display:grid;grid-template-columns:1.2fr .8fr;gap:100px;align-items:center}
-@media (max-width: 900px){ .two-col{grid-template-columns:1fr} .hero-photo-wrap{order:1; justify-self:center} }
-/* --- Force side-by-side on mobile, tighter spacing --- */
-@media (max-width: 640px) {
-  /* Overrider evt. tidligere stacking-regel */
-  .two-col {
-    display: grid;
-    grid-template-columns: minmax(0, 1fr) 140px; /* tekst | lille cirkel */
-    align-items: start;
-    gap: 12px; /* mindre afstand mellem tekst og billede */
-  }
-
-  /* Sørg for at billedet er til højre (ikke reorder til -1) */
-  .hero-photo-wrap {
-    order: initial;
-    justify-self: end;
-    align-self: start;
-    
-  }
-
-  
-
- 
+/* =============================
+   GLOBAL THEME & BASE STYLES
+============================= */
+:root {
+  --sand: #FAF7F2;
+  --clay: #E8DED2;
+  --sage: #6F8F7A;
+  --forest: #163A3A;
+  --slate: #2F3E46;
+  --white: #fff;
+  --radius: 14px;
+  --shadow: 0 6px 20px rgba(0,0,0,0.08);
 }
 
-h1{font-size:clamp(32px,5vw,56px);line-height:1.05;margin:0 0 12px;letter-spacing:-.5px}
-.lead{font-size:clamp(16px,2.2vw,20px);color:var(--slate);margin:0 0 18px}
-.meta{color:var(--slate);opacity:.9;margin-top:10px;font-size:14px}
-.hero-actions{display:flex;gap:12px;flex-wrap:wrap;margin-top:8px}
-.hero-photo {
-  width: 300px;              /* fast størrelse så den kan være perfekt cirkel */
-  height: 300px;
-  border-radius: 50%;        /* gør billedet cirkulært */
-  object-fit: cover;         /* zoomer beskæring så det fylder cirklen pænt */
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { height: 100%; scroll-behavior: smooth; }
+body {
+  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  color: var(--forest);
+  background: var(--sand);
+  line-height: 1.6;
+}
+
+/* =============================
+   LAYOUT
+============================= */
+.container {
+  width: min(1100px, 92%);
+  margin: 0 auto;
+}
+.container.narrow {
+  width: min(820px, 92%);
+}
+
+.section {
+  padding: 72px 0;
+}
+.tint {
+  background: var(--clay);
+}
+
+/* =============================
+   HEADER / NAVIGATION
+============================= */
+.site-header {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  backdrop-filter: saturate(120%) blur(6px);
+  background: rgba(250,247,242,0.9);
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 0;
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.3px;
+  color: var(--forest);
+}
+
+.menu {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.menu a {
+  color: var(--slate);
+  text-decoration: none;
+  font-weight: 500;
+  transition: color 0.2s ease;
+}
+.menu a:hover { color: var(--forest); }
+
+.menu .cta {
+  padding: 10px 14px;
+  background: var(--sage);
+  color: var(--white);
+  border-radius: 999px;
   box-shadow: var(--shadow);
-  display: block;
-  margin: 0 auto;            /* centrerer billedet */
+  white-space: nowrap;
 }
-.btn-primary{display:inline-block;padding:12px 18px;background:var(--sage);color:var(--white);border-radius:12px;text-decoration:none;font-weight:600;box-shadow:var(--shadow)}
-.btn-primary:hover{filter:brightness(.95)}
-.btn-ghost{display:inline-block;padding:12px 18px;background:transparent;color:var(--forest);border-radius:12px;text-decoration:none;border:1px solid rgba(0,0,0,.1)}
-.btn-ghost:hover{background:var(--clay)}
-.section{padding:64px 0}
-.tint{background:var(--clay)}
-h2{font-size:clamp(24px,3vw,34px);margin:0 0 18px}
-h3{font-size:20px;margin:0 0 8px}
-p{line-height:1.6}
-.muted{color:var(--slate)}
-.examples{margin-top:8px}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:16px}
-.card{background:var(--white);border:1px solid rgba(0,0,0,.06);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
-.quote{border-left:4px solid var(--sage);padding-left:16px;margin:18px 0}
-.quote blockquote{margin:0;color:var(--forest)}
-.quote figcaption{color:var(--slate);margin-top:8px;font-size:14px}
-.quote.single{min-height:200px}
-.dots{display:flex;gap:8px;margin-top:10px}
-.dot{width:10px;height:14px;border-radius:50%;border:1px solid var(--slate);background:transparent;cursor:pointer}
-.dot.active{background:var(--sage);border-color:var(--sage)}
-.contact-box{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px}
-.contact-form{display:grid;grid-template-columns:1fr;gap:12px;background:var(--white);border:1px solid rgba(0,0,0,.06);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
-.contact-form label{display:grid;gap:6px;font-weight:500}
-.contact-form input,.contact-form textarea{width:100%;padding:12px;border-radius:10px;border:1px solid rgba(0,0,0,.12);background:#fff;font:inherit}
-.contact-form button{justify-self:start}
-.footer{padding:28px 0;border-top:1px solid rgba(0,0,0,.06)}
-.footer .container{display:flex;gap:12px;align-items:center;justify-content:space-between;font-size:14px;color:var(--slate)}
-a:focus,button:focus,input:focus,textarea:focus{outline:2px solid var(--sage);outline-offset:2px}
-html {
-  scroll-behavior: smooth;
-}
-/* keep CTA on one line on all sizes */
-.menu .cta { white-space: nowrap; }
 
-/* Hide toggle on desktop */
+/* Mobile menu toggle */
 .menu-toggle { display: none; }
 
-/* Mobile layout */
+/* --- Mobile Nav --- */
 @media (max-width: 900px) {
   .nav { position: relative; }
-
   .menu-toggle {
     display: inline-flex;
     align-items: center;
     justify-content: center;
     width: 40px; height: 40px;
     border-radius: 8px;
-    border: 1px solid rgba(0,0,0,.1);
-    background: #fff;
+    border: 1px solid rgba(0,0,0,0.1);
+    background: var(--white);
     font-size: 20px;
     color: var(--forest);
   }
-
-  /* Collapsible menu panel */
   .menu {
     position: absolute;
-    top: 82px;            /* lige under header-linjen */
-    right: 0;
-    background: rgba(250,247,242,.98);
-    border: 1px solid rgba(0,0,0,.06);
+    top: 80px; right: 0;
+    background: rgba(250,247,242,0.98);
+    border: 1px solid rgba(0,0,0,0.06);
     box-shadow: var(--shadow);
     border-radius: 12px;
     padding: 12px;
-    display: none;        /* skjult til toggle */
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
     min-width: 240px;
+    display: none;
   }
   .menu.open { display: flex; }
-
-  /* lidt strammere CTA på mobil */
-  .menu .cta {
-    display: inline-block;
-    text-align: right;
-    padding: 10px px;
-    font-weight: 700;
-    border-radius: 999px;
-  }
-
-  /* Brand + toggle i række, skjul desktop-gap */
-  .container.nav { gap: 12px; }
-  /* --- Hero: tekst og billede side om side --- */
-.two-col {
-  display: grid;
-  grid-template-columns: 1.4fr auto; /* lidt mere plads til tekst */
-  align-items: center;
-  gap: 30px; /* mindre end før */
-}
 }
 
-
-
-
-
-/* --- Mobil: mindre billede og endnu tættere layout --- */
+/* =============================
+   HERO
+============================= */
+.hero {
+  padding: 84px 0 40px;
+}
 @media (max-width: 900px) {
+   .hero {
+  padding: 80px 0 20px;
 
-/* Billedet som cirkel */
-.hero-photo {
-  width: 300px;
-  height: 300px;
-  border-radius: 50%;
-  object-fit: cover;
-  float: right;
-  shape-outside: circle(50%);
-  margin-left: 16px; /* tættere tekst */
+}
+  .hero-inner {
+  display: grid;
+   grid-template-columns: 10fr 1fr !important;
+  align-items: center;
+  gap: 48px;
+} 
+}
+.hero-inner {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  align-items: center;
+  gap: 48px;
+}
+.hero-copy h1 {
+  font-size: clamp(32px, 5vw, 56px);
+  line-height: 1.05;
+  letter-spacing: -0.5px;
+  margin-bottom: 14px;
+}
+.lead {
+  font-size: clamp(16px, 2vw, 20px);
+  color: var(--slate);
+  margin-bottom: 18px;
+}
+.hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+.btn-ghost {
+  display: inline-block;
+  padding: 12px 18px;
+  background: transparent;
+  color: var(--forest);
+  border: 1px solid rgba(0,0,0,0.1);
+  border-radius: 12px;
+  text-decoration: none;
+  transition: background 0.2s ease;
+}
+.btn-ghost:hover {
+  background: var(--clay);
+}
+.meta {
+  color: var(--slate);
+  opacity: 0.9;
+  margin-top: 10px;
+  font-size: 14px;
+}
+
+/* =============================
+   CAPABILITIES / SERVICES
+============================= */
+h2 {
+  font-size: clamp(24px, 3vw, 34px);
+  margin-bottom: 18px;
+}
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+.card {
+  background: var(--white);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: var(--radius);
+  padding: 20px;
   box-shadow: var(--shadow);
 }
-  .hero-photo {
-    width: 175px;
-    height: 175px;
-    shape-outside: circle(50%);
-    float: right;       /* lader teksten flyde rundt om billedet */
-    margin: 0 0 8px 12px; /* mindre afstand */
-  }
-
-  .hero {
-    padding-top: px;
-    margin-bottom: -36px;
-  }
-
-  .hero-copy h1 {
-    margin-top: 0;
-  }
+.card h3 {
+  font-size: 20px;
+  margin-bottom: 8px;
+}
+.card p { color: var(--forest); }
+.examples {
+  margin-top: 8px;
+  color: var(--slate);
 }
 
+/* =============================
+   ABOUT SECTION
+============================= */
+/* ==== ABOUT: stabil wrap + bund-flugt ==== */
+.about-text {
+  position: relative;
+  line-height: 1.6;             /* fast line-height giver konsistent baseline */
+  --size: 175px;                 /* base-størrelse på billedet (desktop) */
+  --tune: 0px;                   /* finjustér bundflugt (kan sættes til 0–8px) */
+}
+.about-text::after { content:""; display:block; clear:both; } /* clearfix */
 
+/* Flydende, rund figur der wrap’er */
+.about-float {
+  float: right;
+  width: var(--size);
+  height: var(--size);
+  margin: 2px 0 10px 24px;      /* luft venstre/under */
+  shape-outside: circle(50%);
+  clip-path: circle(50%);
+  display: flex;                 /* gør det muligt at bundjustere billedet */
+  align-items: flex-start;         /* bund af billedet = bund af figuren */
+  transform: translateY(var(--tune)); /* optisk bund-justering */
+}
+
+.about-photo {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  object-fit: cover;
+  display: block;
+  box-shadow: var(--shadow);
+}
+
+/* Ingen ekstra luft under sidste linje */
+.about-text p:last-child { margin-bottom: 0; }
+
+/* Tablet/mindre skærme – mindre billede og separat finjustering */
+@media (max-width: 900px) {
+  .about-text { --size: 175px; --tune: 4px; }
+  .about-float { margin: 2px 0 8px 24px; }
+}
+
+/* Mobil – wrap bevares, men endnu mindre størrelse og tune */
+@media (max-width: 640px) {
+  .about-text { --size: 175px; --tune: 3px; }
+  .about-float { margin: 0 0 8px 24px; }
+}
+
+/* Meget smalle skærme: hvis wrap bliver klemt, kan du alternativt stacke billedet
+   (fjern kommentar for at slå til)
+@media (max-width: 380px) {
+  .about-float {
+    float: none;
+    margin: 12px 0;
+    shape-outside: none;
+    clip-path: none;
+    transform: none;
+  }
+  .about-photo { width: 120px; height: 120px; margin-inline: auto; }
+}
+*/
+
+
+/* =============================
+   REFERENCES / TESTIMONIALS
+============================= */
+.quote {
+  border-left: 4px solid var(--sage);
+  padding-left: 16px;
+  margin: 20px 0;
+}
+.quote blockquote { color: var(--forest); margin: 0; }
+.quote figcaption { color: var(--slate); margin-top: 8px; font-size: 14px; }
+.dots {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+  justify-content: left;
+}
+.dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  border: 1px solid var(--slate);
+  background: transparent;
+  cursor: pointer;
+}
+.dot.active {
+  background: var(--sage);
+  border-color: var(--sage);
+}
+
+/* =============================
+   CONTACT
+============================= */
+.contact-box {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.contact-form {
+  display: grid;
+  gap: 12px;
+  background: var(--white);
+  border: 1px solid rgba(0,0,0,0.06);
+  border-radius: var(--radius);
+  padding: 18px;
+  box-shadow: var(--shadow);
+}
+.contact-form label {
+  display: grid;
+  gap: 6px;
+  font-weight: 500;
+}
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid rgba(0,0,0,0.12);
+  font: inherit;
+}
+.btn-primary {
+  display: inline-block;
+  padding: 12px 18px;
+  background: var(--sage);
+  color: var(--white);
+  border-radius: 12px;
+  text-decoration: none;
+  font-weight: 600;
+  box-shadow: var(--shadow);
+  border: none;
+  cursor: pointer;
+}
+.btn-primary:hover {
+  filter: brightness(0.95);
+}
+
+/* =============================
+   FOOTER
+============================= */
+.footer {
+  padding: 28px 0;
+  border-top: 1px solid rgba(0,0,0,0.06);
+}
+.footer .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: var(--slate);
+}
