@@ -351,9 +351,9 @@ h2 {
 
 /* CONTACT header layout (desktop/tablet) */
 #contact .contact-top{
-  --photo-size: clamp(140px, 26vw, 220px);
+  --photo-size: clamp(140px, 20vw, 170px);
   display:grid;
-  grid-template-columns: 1fr var(--photo-size);  /* text | photo */
+  grid-template-columns: 2fr var(--photo-size);  /* text | photo */
   grid-template-rows: auto auto;                 /* row1: headline+lead, row2: CTA */
   grid-template-areas:
     "text  photo"
@@ -383,32 +383,56 @@ h2 {
     padding: 14px 16px;
 }
 
-/* ---------- Mobile behavior: only the small text changes layout ---------- */
+/* MOBILE: text | photo (top row), CTA full-width below */
 @media (max-width: 520px){
-  /* Reorder so the image is at the TOP; button remains full-width below */
   #contact .contact-top{
-    grid-template-columns: 1fr;
+    /* two columns for text+photo, then CTA spans both */
+    --photo-size: clamp(150px, 36vw, 140px);
+    display: grid;
+    grid-template-columns: 1fr var(--photo-size); /* text | photo */
+    grid-template-rows: auto auto;                /* row1: text+photo, row2: cta */
     grid-template-areas:
-      "photo"   /* image on top */
-      "text"    /* small text next */
-      "cta";    /* button last (unchanged, full width) */
-    justify-items:start;
-    row-gap:14px;
+      "text  photo"
+      "cta   cta";
+    align-items: start;
+    column-gap: 24px;
+    row-gap: 24px;
   }
-  #contact .contact-portrait { justify-self:start; }
-
-  /* Only affect the small text on mobile (keep headline + button as-is) */
-  #contact .contact-text .lead{
-    max-width: 36ch;        /* nicer line length on small screens */
-    margin-top: 4px;
+ #contact .contact-text h2 .mobile-break{
+    display:block;      /* forces line break before the span */
   }
+  #contact .contact-text     { grid-area: text; }
+  #contact .contact-portrait { grid-area: photo; justify-self: end; }
+  #contact .contact-cta      { grid-area: cta; }
 
-  /* Optional: slightly smaller photo on very small devices */
+  /* keep the photo small on mobile */
   #contact .contact-photo{
-    width:140px;
-    height:140px;
+    width: var(--photo-size);
+    height: var(--photo-size);
+    border-radius: 50%;
+    object-fit: cover;
+    display: block;
+    box-shadow: var(--shadow);
+  }
+
+  /* button stays full width of the left column’s width (now the whole row) */
+  #contact .contact-cta .btn-ghost{
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 14px 16px;
+  }
+
+  /* optional: tighten the lead only, not the button */
+  #contact .contact-text .lead{
+    max-width: 36ch;
+    margin: 0;
   }
 }
+/* Only on mobile: put "your next step" on a new line */
+
+
+
 
 
 
