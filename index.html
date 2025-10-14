@@ -76,18 +76,28 @@
     <!-- About -->
 <section class="section tint" id="about">
   <div class="container narrow">
-    <div class="about-text">
-      <h2>About Me</h2>
-<figure class="about-float">
-        <img src="portrait.jpg" alt="Portrait of Line Haugaard" class="about-photo" />
-      </figure>
-      <p>For more than 15 years, I’ve worked across corporates, startups and scaleups – always focused on turning data, insights and innovation into real business.</p>
-      <p>At NIQ, I advised global food and beverage brands on innovation and category strategy, helping them use data to make confident growth decisions. At Toms, I was part of bringing new products to market – experience I now use when I support ventures on their journey from idea to impact.</p>  
-      <p>As Program Lead in the accelerator, I guided 100+ FoodTech startups through tailored programs on product-market-fit, go-to-market, investor readiness and scale-up.</p>
-      <p>One of my key strengths is navigating ecosystems and matchmaking across stakeholders – connecting corporates, founders, investors and partners to create shared solutions and scalable impact.</p>
-    </div>
+    <h2>About Me</h2>
+    <p>
+      For more than 15 years, I’ve worked across corporates, startups and scaleups - always focused on
+      turning data, insights and innovation into real business.
+    </p>
+    <p>
+      At NIQ, I advised global food and beverage brands on innovation and category strategy, helping them use data to make
+      confident growth decisions. At Toms, I was part of bringing new products to market - experience I now use when I
+      support ventures on their journey from idea to impact.
+    </p>
+    <p>
+      As Program Lead in the accelerator, I guided 100+ FoodTech startups through tailored programs on
+      product-market-fit, go-to-market, investor readiness and scale-up. I know what it takes to balance ambition, data and
+      execution in fast-moving environments.
+    </p>
+    <p>
+      One of my key strengths is navigating ecosystems and matchmaking across stakeholders - connecting corporates, founders,
+      investors and partners to create shared solutions and scalable impact.
+    </p>
   </div>
 </section>
+
 
 
 
@@ -126,25 +136,45 @@
           <button class="dot" aria-selected="false" aria-label="Show reference 2"></button>
           <button class="dot" aria-selected="false" aria-label="Show reference 3"></button>
         </div>
-      </div>
+      </div>  
     </section>
 
     <!-- Contact -->
-    <section class="section tint" id="contact">
-      <div class="container">
+<section class="section tint" id="contact">
+  <div class="container">
+    <!-- Top: text (left) + image (right) + CTA under -->
+    <div class="contact-top">
+      <div class="contact-text">
         <h2>Let’s talk about your next step</h2>
-        <p class="lead">Whether you’re a founder, a scaleup or a corporate venturing into new areas - I can help you navigate complexity and create real business impact.</p>
-        <div class="contact-box">
-          <a class="btn-ghost" href="mailto:haugaardline@gmail.com">✉️ Or drop me an email: haugaardline@gmail.com</a>
-        </div>
-        <form class="contact-form" action="mailto:haugaardline@gmail.com" method="post" enctype="text/plain">
-          <label>Name<input type="text" name="name" placeholder="Your name" required></label>
-          <label>Email<input type="email" name="email" placeholder="you@example.com" required></label>
-          <label>Message<textarea name="message" rows="5" placeholder="How can I help?" required></textarea></label>
-          <button class="btn-primary" type="submit">Send</button>
-        </form>
+        <p class="lead">
+          Whether you’re a founder, a scaleup or a corporate venturing into new areas - 
+          I can help you navigate complexity and create real business impact.
+        </p>
       </div>
-    </section>
+
+      <aside class="contact-portrait">
+        <img class="contact-photo" src="portrait.jpg" alt="Portrait of Line Haugaard" />
+      </aside>
+
+      <!-- CTA lives as its own grid item so we can keep it under the photo -->
+      <div class="contact-cta">
+        <a class="btn-ghost" href="mailto:haugaardline@gmail.com">
+          ✉️ Or drop me an email: haugaardline@gmail.com
+        </a>
+      </div>
+    </div>
+
+    <!-- Full-width form underneath -->
+    <form class="contact-form" action="mailto:haugaardline@gmail.com" method="post" enctype="text/plain">
+      <label>Name<input type="text" name="name" placeholder="Your name" required></label>
+      <label>Email<input type="email" name="email" placeholder="you@example.com" required></label>
+      <label>Message<textarea name="message" rows="5" placeholder="How can I help?" required></textarea></label>
+      <button class="btn-primary" type="submit">Send</button>
+    </form>
+  </div>
+</section>
+
+
   </main>
 
   <!-- Footer -->

@@ -140,7 +140,7 @@ body {
 }
 .hero-inner {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: 3fr 1fr;
   align-items: center;
   gap: 48px;
 }
@@ -234,14 +234,7 @@ h2 {
   transform: translateY(var(--tune)); /* optisk bund-justering */
 }
 
-.about-photo {
-  width: 100%;
-  height: 100%;
-  border-radius: 50%;
-  object-fit: cover;
-  display: block;
-  box-shadow: var(--shadow);
-}
+
 
 /* Ingen ekstra luft under sidste linje */
 .about-text p:last-child { margin-bottom: 0; }
@@ -304,34 +297,44 @@ h2 {
 /* =============================
    CONTACT
 ============================= */
+/* =========================
+   CONTACT — clean + responsive
+   (paste this and remove the old contact rules)
+========================= */
+
+/* Shared elements */
 .contact-box {
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
   margin-bottom: 16px;
 }
+
 .contact-form {
   display: grid;
   gap: 12px;
   background: var(--white);
-  border: 1px solid rgba(0,0,0,0.06);
+  border: 1px solid rgba(0,0,0,.06);
   border-radius: var(--radius);
   padding: 18px;
   box-shadow: var(--shadow);
 }
+
 .contact-form label {
   display: grid;
   gap: 6px;
   font-weight: 500;
 }
+
 .contact-form input,
 .contact-form textarea {
   width: 100%;
   padding: 12px;
   border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.12);
+  border: 1px solid rgba(0,0,0,.12);
   font: inherit;
 }
+
 .btn-primary {
   display: inline-block;
   padding: 12px 18px;
@@ -344,9 +347,70 @@ h2 {
   border: none;
   cursor: pointer;
 }
-.btn-primary:hover {
-  filter: brightness(0.95);
+.btn-primary:hover { filter: brightness(.95); }
+
+/* CONTACT header layout (desktop/tablet) */
+#contact .contact-top{
+  --photo-size: clamp(140px, 26vw, 220px);
+  display:grid;
+  grid-template-columns: 1fr var(--photo-size);  /* text | photo */
+  grid-template-rows: auto auto;                 /* row1: headline+lead, row2: CTA */
+  grid-template-areas:
+    "text  photo"
+    "cta   photo";                               /* CTA under text; photo stays right */
+  align-items:center;
+  column-gap:20px;
+  row-gap:16px;
+  margin-bottom:20px;
 }
+
+#contact .contact-text     { grid-area:text; }
+#contact .contact-portrait { grid-area:photo; justify-self:end; }
+#contact .contact-cta      { grid-area:cta;   align-self:start; }
+
+#contact .contact-photo{
+  width:var(--photo-size);
+  height:var(--photo-size);
+  border-radius:50%;
+  object-fit:cover;
+  display:block;
+  box-shadow:var(--shadow);
+}
+
+/* Make the email button full-width in the left column (all sizes) */
+#contact .contact-cta .btn-ghost{
+      text-align: left;
+    padding: 14px 16px;
+}
+
+/* ---------- Mobile behavior: only the small text changes layout ---------- */
+@media (max-width: 520px){
+  /* Reorder so the image is at the TOP; button remains full-width below */
+  #contact .contact-top{
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "photo"   /* image on top */
+      "text"    /* small text next */
+      "cta";    /* button last (unchanged, full width) */
+    justify-items:start;
+    row-gap:14px;
+  }
+  #contact .contact-portrait { justify-self:start; }
+
+  /* Only affect the small text on mobile (keep headline + button as-is) */
+  #contact .contact-text .lead{
+    max-width: 36ch;        /* nicer line length on small screens */
+    margin-top: 4px;
+  }
+
+  /* Optional: slightly smaller photo on very small devices */
+  #contact .contact-photo{
+    width:140px;
+    height:140px;
+  }
+}
+
+
 
 /* =============================
    FOOTER
