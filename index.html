@@ -1,637 +1,189 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>JENS HAUGAARD</title>
-  <link rel="icon" type="image/x-icon" href="/FAVICON.png">
-  <link rel="stylesheet" href="https://use.typekit.net/qyf2jna.css">
-  <style>
-    :root{
-      --thumb-w: 70px;
-      --thumb-w-sm: 56px;
-      --hero-h: 80svh;
-      --speed: 0.045;     /* px per ms for auto glide */
-      --gap: 0;
-    }
-
-    html, body{
-      margin:0; padding:0; height:100svh; overflow:hidden;
-      background:#fff; color:#000;
-      font-family:"neue-haas-grotesk-display", system-ui, -apple-system, Segoe UI, Roboto, sans-serif;
-      user-select:none; -webkit-user-select:none; -ms-user-select:none;
-    }
-
-    /* HERO (big image behind the strip) */
-    .hero-wrap{ position:fixed; inset:0; display:grid; place-items:center; z-index:1; pointer-events:none; }
-    .hero-layer{
-      max-height:var(--hero-h); max-width:100%;
-      width:auto; height:auto; object-fit:contain;
-      position:absolute; left:50%; top:50%;
-      transform:translate(-50%,-50%); opacity:0; will-change:opacity; contain:paint;
-    }
-    .hero-layer.show{ opacity:1; transform:translate(-50%,-50%) translateZ(0); }
-
-    /* THUMB STRIP */
-    .rail-wrap{ position:fixed; inset:0; display:grid; place-items:center; z-index:5; opacity:1; transition:opacity .5s ease; will-change:opacity; }
-    .rail-wrap.is-hidden{ opacity:0; }
-    .rail-wrap.fast{ transition-duration:.3s; }
-    .rail{ position:relative; display:flex; align-items:center; gap:var(--gap); width:100vw; overflow:hidden; cursor:grab; touch-action:none; }
-    body.dragging, .rail.dragging{ cursor:grabbing; }
-
-    *{ -webkit-tap-highlight-color:transparent; }
-    img, .thumb{ -webkit-user-drag:none; user-drag:none; -webkit-touch-callout:none; }
-
-    .track{ display:flex; gap:0; will-change:transform; transform:translateZ(0); backface-visibility:hidden; }
-    .set{ display:flex; gap:0; }
-
-    .thumb{
-      flex:0 0 auto; width:var(--thumb-w); aspect-ratio:4/5;
-      position:relative; overflow:hidden; border:0; margin:0; padding:0; background:#000;
-    }
-    .thumb img{ width:100%; height:100%; object-fit:cover; display:block; backface-visibility:hidden; transform:translateZ(0); }
-
-    .caption{
-      position:fixed; inset:auto 0 14px 0; text-align:center;
-      font-size:12px; letter-spacing:.01em; z-index:6; user-select:none;
-    }
-
-    @media (max-width:800px){
-      :root{ --thumb-w:var(--thumb-w-sm); --hero-h:80svh; }
-      .caption{ font-size:12px; inset-block-end:8px; }
-      .hero-layer{ width:100%; height:80svh; max-width:100%; max-height:80svh; }
-    }
-
-    /* ===== Overlay / Menu / Preloader ===== */
-    #menuToggle{
-      position:absolute; top:24px; left:24px; width:20px; height:20px;
-      z-index:110 !important; cursor:pointer; mix-blend-mode:difference;
-      -webkit-user-drag:none; user-select:none; touch-action:manipulation;
-      transition:transform .4s cubic-bezier(.37,.01,.65,.99);
-      display:block; pointer-events:auto;
-    }
-    #menuToggle::before{
-      content:""; position:absolute; top:-24px; right:-24px; bottom:-24px; left:-24px;
-      background:linear-gradient(transparent,transparent); pointer-events:auto;
-    }
-    #menuToggle.rotated{ transform:rotate(45deg); }
-
-    /* Optional separate hit-area (kept for robustness across browsers) */
-    #menuHit{
-      position:absolute; top:24px; left:24px; width:56px; height:56px;
-      transform:translate(-18px,-18px); background:transparent; border:0; padding:0; margin:0;
-      cursor:pointer; z-index:111 !important; -webkit-tap-highlight-color:transparent; touch-action:manipulation;
-    }
-
-    /* Floating label next to the menu icon */
-#menuLabel{
-  position: absolute;
-  top: 24px;                /* align with your icon */
-  left: 24px;
-  transform: translate(32px, 1px);  /* offset to the right of the icon */
-  font-size: 16px;
-  line-height: 1;
-  letter-spacing: .01em;
-
-  color: #fff;
-  mix-blend-mode: difference;
-  pointer-events: none;     /* never blocks clicks */
-  opacity: 0;
-  transition: opacity .4s ease;
-
-  z-index: 103;             /* above overlay and hit area */
-}
-
-/* Text: info by default, close when menu is open */
-#menuLabel::after { content: 'info'; }
-body.menu-open #menuLabel::after { content: 'close'; }
-
-/* Show label on hover/focus of icon or hit area */
-#menuToggle:hover ~ #menuLabel,
-#menuHit:hover ~ #menuLabel,
-#menuToggle:focus-visible ~ #menuLabel,
-#menuHit:focus-visible ~ #menuLabel{
-  opacity: 1;
-}
-
-
-    #overlay{
-      position:fixed; inset:0; height:100svh; background:rgba(0,0,0,.9);
-      backdrop-filter:blur(10px); z-index:99; display:flex; align-items:center; justify-content:center;
-      color:#fff; font-family:"neue-haas-grotesk-display", sans-serif;
-      opacity:0; pointer-events:none; transition:opacity .4s ease;
-    }
-    #overlay.active{ opacity:1; pointer-events:all; }
-    body.menu-open .rail-wrap{ opacity:0 !important; pointer-events:none; }
-    body.menu-open .caption{ opacity:0; }
-
-    .overlay-content{
-      position:absolute; width:100%; height:100%; padding:20px; box-sizing:border-box;
-      display:grid; grid-template-columns:1fr 1fr 2fr; align-items:center; gap:24px;
-      font-size:14px; font-weight:500;
-    }
-    @media (max-width:800px){
-      .overlay-content{ grid-template-columns:1fr 1fr 1fr; text-align:left; font-size:12px; line-height:1.2; }
-    }
-    #overlay .overlay-content a, #overlay .overlay-bottom a{
-      color:#fff; text-decoration:none; background-image:linear-gradient(currentColor,currentColor);
-      background-size:0% 1px; background-position:0 100%; background-repeat:no-repeat;
-      transition:background-size .35s cubic-bezier(.37,.01,.65,.99);
-    }
-    #overlay.active .overlay-content a:hover,
-    #overlay.active .overlay-bottom a:hover,
-    #overlay.active .overlay-content a:focus-visible,
-    #overlay.active .overlay-bottom a:focus-visible{ background-size:100% 1px; outline:none; }
-
-    .overlay-bottom{ position:absolute; left:20px; right:24px; bottom:16px; line-height:1.2; opacity:.95; }
-    @media (max-width:800px){ .overlay-bottom{ font-size:12px; } }
-
-    /* Preloader */
-    #preloader-overlay{
-      position:fixed; inset:0; width:100%; height:100svh; background:#fff; z-index:1000;
-      opacity:1; pointer-events:none; transition:opacity 1000ms cubic-bezier(.42,0,.58,1);
-    }
-    #preloader{ position:absolute; top:50%; left:50%; transform:translate(-50%,-50%); z-index:2000; mix-blend-mode:difference; }
-    #preloader-icon{ width:20px; height:20px; filter:brightness(0) saturate(100%) invert(1); animation:rotatePreloader 1750ms cubic-bezier(.42,0,.58,1) forwards; }
-    @media (max-width:800px){ #preloader-icon{ width:16px; height:16px; } }
-    @keyframes rotatePreloader{
-      0%{ transform:rotate(0deg) scale(25%); }
-      30%{ transform:rotate(0deg) scale(110%); }
-      100%{ transform:rotate(180deg) scale(110%); }
-    }
-    #preloader-overlay.fade-out{ opacity:0; }
-  </style>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Line Haugaard – Advisor & Consulting</title>
+  <meta name="description" content="I bring commercial life to great ideas. From FoodTech to scaling new ventures - I help founders and companies turn insights and innovation into sustainable business impact.">
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <!-- Preloader -->
-  <div id="preloader-overlay">
-    <div id="preloader"><img src="menu.svg" alt="Preloader Icon" id="preloader-icon"/></div>
+  <!-- Header -->
+ <header class="site-header">
+  <div class="container nav">
+    <div class="brand">Line Haugaard</div>
+
+    <!-- Mobile toggle button -->
+    <button class="menu-toggle" aria-expanded="false" aria-controls="primary-menu" aria-label="Open menu">
+      ☰
+    </button>
+
+    <nav id="primary-menu" class="menu" aria-label="Primary">
+      <a href="#services">Services</a>
+      <a href="#about">About</a>
+      <a href="#references">References</a>
+      <!-- Phone number only here -->
+      <a href="tel:+4521372250" class="cta">Call +45 21 37 22 50</a>
+    </nav>
   </div>
+</header>
 
-  <!-- Menu toggle (icon + optional enlarged hit area) -->
-  <img src="menu.svg" id="menuToggle" alt="Open menu">
-  <button id="menuHit" aria-label="Open menu"></button>
-  <span id="menuLabel" aria-hidden="true"></span>
+  <main>
+    <!-- Hero -->
+    <section class="hero" id="home">
+      <div class="container hero-inner two-col">
+        <div class="hero-copy">
+          <h1>I bring commercial life to great ideas.</h1>
+          <p class="lead">From FoodTech to scaling new ventures - I help founders and companies turn insights and innovation into sustainable business impact.</p>
+          <div class="hero-actions">
+            <a class="btn-ghost" href="mailto:haugaardline@gmail.com">✉️ Email me</a>
+          </div>
+          <p class="meta">Based in Copenhagen · Working globally</p>
+        </div>
+        
+      </div>
+    </section>
 
-  <!-- Overlay -->
-  <div id="overlay" aria-hidden="true">
-    <div class="overlay-content">
-      <p style="text-align:left"><a href="https://www.instagram.com/jenshaugaaard">@jenshaugaaard</a></p>
-      <p style="text-align:center"><a href="mailto:hello@jenshaugaard.com">hello@jenshaugaard.com</a></p>
-      <p style="text-align:right">+45 53 64 84 44</p>
-      <div class="overlay-bottom">
-        <p>PHOTOGRAPHER AND MULTIDISCIPLINARY<br>
-        CREATIVE EXPLORING VISUAL MEDIUMS.<br>
-        BASED IN COPENHAGEN. CURRENTLY AT <a href="https://www.ducor.dk">DUCOR</a><br>
-        ©2025 JENS HAUGAARD</p>
+    <!-- Capabilities -->
+    <section class="section compact-top" id="services">
+      <div class="container">
+        <h2>Capabilities</h2>
+        <div class="grid">
+          <article class="card">
+            <h3>Insights - From data to clear decisions</h3>
+            <p>I make complex markets simple - so you can act with confidence.</p>
+            <p class="muted examples">Examples: market analysis, trend mapping, data-driven assessment of new opportunities.</p>
+          </article>
+          <article class="card">
+            <h3>Strategy - From vision to growth plan</h3>
+            <p>I develop strategies that inspire investors and create ownership inside your team.</p>
+            <p class="muted examples">Examples: product-market-fit, go-to-market strategy, venture maturation, commercial partnership development.</p>
+          </article>
+          <article class="card">
+            <h3>Execution - From plan to results</h3>
+            <p>I bring structure and momentum to projects - so strategies turn into real progress.</p>
+            <p class="muted examples">Examples: project leadership, partnership negotiations, implementation of market initiatives.</p>
+          </article>
+          <article class="card">
+            <h3>Connections that create impact</h3>
+            <p>I open doors to networks, partners and funding opportunities - helping you find the right matches to accelerate growth.</p>
+            <p class="muted examples">Examples: advisory boards, partner matchmaking, soft funding applications.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- About -->
+<section class="section tint" id="about">
+  <div class="container narrow">
+    <h2>About Me</h2>
+    <p>
+      For more than 15 years, I’ve worked across corporates, startups and scaleups - always focused on
+      turning data, insights and innovation into real business.
+    </p>
+    <p>
+      At NIQ, I advised global food and beverage brands on innovation and category strategy, helping them use data to make
+      confident growth decisions. At Toms, I was part of bringing new products to market - experience I now use when I
+      support ventures on their journey from idea to impact.
+    </p>
+    <p>
+      As Program Lead in the accelerator, I guided 100+ FoodTech startups through tailored programs on
+      product-market-fit, go-to-market, investor readiness and scale-up. I know what it takes to balance ambition, data and
+      execution in fast-moving environments.
+    </p>
+    <p>
+      One of my key strengths is navigating ecosystems and matchmaking across stakeholders - connecting corporates, founders,
+      investors and partners to create shared solutions and scalable impact.
+    </p>
+  </div>
+</section>
+
+
+
+
+
+
+
+    <!-- References (auto-rotate 8s, swipe on mobile) -->
+    <section class="section" id="references">
+      <div class="container narrow">
+        <h2>References</h2>
+
+        <!-- Order: Visibuilt, Nordic Koji, EatGrim -->
+        <figure class="quote single" data-idx="0">
+          <blockquote>
+            "Line has brought both heart and mind as a mentor. She ensured that we met all deadlines, worked extremely efficiently, and with her vibrant energy, she has been able to support startups in food, beverages, materials, and bioeconomy. Line asks the right questions about the core business that help sharpen focus and make the right decisions, while uncovering blind spots that are invaluable to startups. Her vast network and deep understanding of what creates value not only for startups but also for the ecosystem they operate in are key strengths. You're lucky if you get Line on board. I plan to continue working with Line, and I wholeheartedly recommend her to others - even though you'd want to keep her all to yourself."
+          </blockquote>
+          <figcaption>- Line Kloster Pedersen, Founder, Visibuilt</figcaption>
+        </figure>
+
+        <figure class="quote single" data-idx="1" hidden>
+          <blockquote>
+            One of Line’s standout qualities is her ability to maintain a clear focus on Nordic Koji’s developed strategy implementation. With an impressive recollection of our initial discussions, she consistently ensured that we remained on track and aligned with our long-term plans. Her comprehensive understanding of our business goals and the industry landscape has proven invaluable in keeping our compass pointed in the right direction. Working with Line during the accelerator program has been an absolute pleasure and a true honor. Her dedication, expertise, and unwavering commitment to helping startups succeed make her an outstanding mentor and advisor. Therefore, I highly recommend Line Haugaard to any individual or organization seeking to excel and expand their startup venture.
+          </blockquote>
+          <figcaption>- Mac Król, Founder, Nordic Kōji Company ApS</figcaption>
+        </figure>
+
+        <figure class="quote single" data-idx="2" hidden>
+          <blockquote>
+            It is truly my pleasure to recommend Line. Throughout her time at Eat Grim, she’s provided very tangible and customer-focused, data-driven insights - and always in a very efficient manner, we never have to wait for results for long. Line has a very proactive approach and brings in new ideas and perspectives in a constructive matter, which are both key aspects in a busy startup like ours. Our whole team has learned a lot from her and are extremely thankful for the ways she has helped our company grow. I can highly recommend her as an advisor and as a positive, energetic team member that will make things happen.
+          </blockquote>
+          <figcaption>- Petra Kaukua, CEO EatGrim</figcaption>
+        </figure>
+
+        <div class="dots" role="tablist" aria-label="Testimonials">
+          <button class="dot active" aria-selected="true" aria-label="Show reference 1"></button>
+          <button class="dot" aria-selected="false" aria-label="Show reference 2"></button>
+          <button class="dot" aria-selected="false" aria-label="Show reference 3"></button>
+        </div>
+      </div>  
+    </section>
+
+    <!-- Contact -->
+<section class="section tint" id="contact">
+  <div class="container">
+    <!-- Top: text (left) + image (right) + CTA under -->
+    <div class="contact-top">
+      <div class="contact-text">
+        <h2>Let’s talk about your <span class="mobile-break"> </span>next step</span></h2>
+        <p class="lead">
+          Whether you’re a founder, a scaleup or a corporate venturing into new areas -<br> 
+          I can help you navigate complexity and create real business impact.
+        </p>
+      </div>
+
+      <aside class="contact-portrait">
+        <img class="contact-photo" src="portrait.jpg" alt="Portrait of Line Haugaard" />
+      </aside>
+
+      <!-- CTA lives as its own grid item so we can keep it under the photo -->
+      <div class="contact-cta">
+        <a class="btn-ghost" href="mailto:haugaardline@gmail.com">
+          ✉️ Or drop me an email: haugaardline@gmail.com
+        </a>
       </div>
     </div>
-  </div>
 
-  <!-- Hero -->
-  <div class="hero-wrap">
-    <img class="hero-layer show" id="heroA" alt="Current image layer A">
-    <img class="hero-layer" id="heroB" alt="Current image layer B">
+    <!-- Full-width form underneath -->
+    <form class="contact-form" action="mailto:haugaardline@gmail.com" method="post" enctype="text/plain">
+      <label>Name<input type="text" name="name" placeholder="Your name" required></label>
+      <label>Email<input type="email" name="email" placeholder="you@example.com" required></label>
+      <label>Message<textarea name="message" rows="5" placeholder="How can I help?" required></textarea></label>
+      <button class="btn-primary" type="submit">Send</button>
+    </form>
   </div>
+</section>
 
-  <!-- Carousel -->
-  <div class="rail-wrap">
-    <div class="rail" id="rail" aria-label="Work carousel">
-      <div class="track" id="track"></div>
+
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <span>© <span id="year"></span> Line Haugaard · Copenhagen</span>
     </div>
-  </div>
+  </footer>
 
-  <div class="caption" id="caption" aria-live="polite">&nbsp;</div>
-
-  <script>
-  (()=>{
-    "use strict";
-
-    /* =========================
-       DATA
-    ========================= */
-    let images = [
-    
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK3.png?updatedAt=1746569168316", title:"Lamin, SKYLL Artwork Photography"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK_4C2A8077%20(1).jpg?updatedAt=1750228600988", title:"Lamin Press Photography"},
-            {src:"https://ik.imagekit.io/ou0fyxmmi/WORK5.png?updatedAt=1746569166859", title:"Ducor Webdesign"},
-       {src:"https://ik.imagekit.io/ou0fyxmmi/WORK12.png?updatedAt=1746988566466", title:"Campaign Graphics"},
-          {src:"https://ik.imagekit.io/ou0fyxmmi/QURATEExSNKRS_JULY1926.jpg?updatedAt=1760568963291", title:"Quratee x Nike SNKRS Campaign"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK7.PNG?updatedAt=1746988570168", title:"Lostboys Edit + Graphics"},
-       {src:"https://ik.imagekit.io/ou0fyxmmi/WORK15.JPG?updatedAt=1749794017782", title:"Kundo, 24 Artwork Photography"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK8.png?updatedAt=1746988565327", title:"Artigeardit & Lamin, NHVEH Artwork Photography"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK9.png?updatedAt=1746988567337", title:"Lamin, SKYLL Billboard Photography"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK10.png?updatedAt=1746988566926", title:"RTW Campaign Photography"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK11.png?updatedAt=1746988567431", title:"Maecor Photography"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK16.JPG?updatedAt=1749794012884", title:"Noah Carter, Guld & Grønne Artwork Photography"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK17.JPEG?updatedAt=1749794010883", title:"Campaign Photography"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/FOREVERLAST_21_070255_LOWRES.jpg?updatedAt=1760568551971", title:"Foreverlast Lookbook Photography"},
-        {src:"https://ik.imagekit.io/ou0fyxmmi/WORK4.png?updatedAt=1746569166583", title:"Artigeardit, Længe Leve Artwork Photography"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK13.png?updatedAt=1746988567415", title:"Campaign Photography"},
-       {src:"https://ik.imagekit.io/ou0fyxmmi/000027610007_HIGHRES.jpg?updatedAt=1760568443958", title:"Maecor Capsule03"},
-       {src:"https://ik.imagekit.io/ou0fyxmmi/WORK6.png?updatedAt=1746988566457", title:"Maecor Webdesign + Development"},
-       {src:"https://ik.imagekit.io/ou0fyxmmi/WORK1.png?updatedAt=1746569166951", title:"Brand Identity"},
-      {src:"https://ik.imagekit.io/ou0fyxmmi/WORK2.png?updatedAt=1746569168372", title:"Maecor Photography"},
-    ];
-
-    async function loadImagesFromJSON(){
-      try{
-        const r = await fetch('images.json', {cache:'no-store'});
-        if(r.ok){
-          const data = await r.json();
-          if(Array.isArray(data) && data.every(o=>o && o.src)) images = data;
-        }
-      }catch(_){}
-    }
-
-    /* =========================
-       HELPERS
-    ========================= */
-    const DPR = Math.min(window.devicePixelRatio || 1, 2);
-    const $ = (sel, root=document)=> root.querySelector(sel);
-
-    function makeThumbUrl(src, width){
-      try{
-        const u = new URL(src);
-        const tr = `tr=w-${Math.max(40, Math.round(width))},q-35`;
-        u.search = u.search ? (u.search + `&${tr}`) : (`?${tr}`);
-        return u.toString();
-      }catch(_){ return src; }
-    }
-    function currentThumbCssWidth(){
-      const cs = getComputedStyle(document.documentElement);
-      return parseFloat(cs.getPropertyValue('--thumb-w')) || 70;
-    }
-
-    /* =========================
-       DOM REFS
-    ========================= */
-    const rail      = $('#rail');
-    const railWrap  = $('.rail-wrap');
-    const track     = $('#track');
-    const heroA     = $('#heroA');
-    const heroB     = $('#heroB');
-    const caption   = $('#caption');
-    const menuIcon  = $('#menuToggle');
-    const menuHit   = $('#menuHit');
-    const overlay   = $('#overlay');
-    const pre       = $('#preloader-overlay');
-
-    /* =========================
-       INITIAL HERO
-    ========================= */
-    let frontIsA = true;
-    if(images && images.length){
-      heroA.src = images[0].src;
-      heroA.classList.add('show');
-      caption.textContent = `1 / ${images.length} — ${images[0].title || ''}`;
-    }
-
-    /* =========================
-       BUILD STRIP
-    ========================= */
-    function buildSet(){
-      const set = document.createElement('div');
-      set.className = 'set';
-      const w = currentThumbCssWidth() * DPR;
-      images.forEach((it, idx)=>{
-        const b = document.createElement('div');
-        b.className = 'thumb';
-        b.setAttribute('role','option');
-        b.setAttribute('aria-label', it.title || `Image ${idx+1}`);
-        b.dataset.index = idx;
-
-        const img = new Image();
-        img.decoding = 'async';
-        img.loading = 'eager';
-        img.draggable = false;
-        img.fetchPriority = 'low';
-        const url1 = makeThumbUrl(it.src, w);
-        const url2 = makeThumbUrl(it.src, w*2);
-        img.src = url1;
-        img.srcset = `${url1} 1x, ${url2} 2x`;
-
-        b.appendChild(img);
-        set.appendChild(b);
-      });
-      return set;
-    }
-
-    let firstSet, secondSet, thirdSet, setWidth = 0;
-    function measure(){
-      const fallback = (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--thumb-w')) || 70) * images.length;
-      setWidth = fallback;
-      const w = firstSet.getBoundingClientRect().width;
-      if(w > 0) setWidth = w;
-    }
-    function buildAllSets(){
-      track.innerHTML = '';
-      firstSet = buildSet();
-      secondSet = buildSet();
-      thirdSet = buildSet();
-      track.append(firstSet, secondSet, thirdSet);
-      measure();
-      tx = 0; applyTransform();
-      updateHero(computeActiveIndex());
-    }
-
-    /* =========================
-       HERO SYNC
-    ========================= */
-    let activeIndex = -1;
-    const prefetched = new Set();
-
-    function computeActiveIndex(){
-      const w = (setWidth / images.length) || (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--thumb-w')) || 70);
-      const s = (innerWidth/2 - tx) / w - 0.5;
-      const idx = ((Math.round(s) % images.length) + images.length) % images.length;
-      return idx;
-    }
-
-    async function updateHero(i){
-      if(i === activeIndex) return;
-      activeIndex = i;
-      const item = images[i];
-      if(!item) return;
-
-      const front = frontIsA ? heroA : heroB;
-      const back  = frontIsA ? heroB : heroA;
-
-      const preImg = new Image();
-      preImg.decoding = 'async';
-      preImg.src = item.src;
-      try{ if(preImg.decode) await preImg.decode(); }catch(_){}
-
-      requestAnimationFrame(()=>{
-        back.src = item.src;
-        back.classList.add('show');
-        front.classList.remove('show');
-        frontIsA = !frontIsA;
-      });
-
-      caption.textContent = `${i+1} / ${images.length} — ${item.title || ''}`;
-
-      const n1 = images[(i+1)%images.length];
-      const p1 = images[(i-1+images.length)%images.length];
-      [n1, p1].forEach(it=>{
-        if(it && !prefetched.has(it.src)){
-          const img=new Image(); img.decoding='async'; img.src=it.src; prefetched.add(it.src);
-        }
-      });
-    }
-
-    /* =========================
-       AUTOPLAY + DRAG/INERTIA
-    ========================= */
-    let lastTime = 0;
-    let tx = 0;
-    const AUTO_SPEED = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--speed')) || 0.045; // px/ms
-    const AUTO_DIR = -1;
-
-    let isDragging = false;
-    let uiLocked = false;
-    let inertial = false;
-    let lastPX = 0;
-    let vel = AUTO_SPEED * AUTO_DIR;
-    let lastMoveTS = 0;
-    let lastHeroCheck = 0;
-    let lastHeroRendered = -1;
-    let dtSmooth = 16.7;
-    let idxStableSince = 0;
-    let currentIdx = -1;
-    const heroIdleInterval = 650;
-    const heroActiveInterval = 80;
-
-    const PIXEL_QUANT = (window.devicePixelRatio && window.devicePixelRatio >= 2) ? 0.5 : 1;
-
-    function applyTransform(){
-      const snapped = Math.round(tx/PIXEL_QUANT)*PIXEL_QUANT;
-      track.style.transform = `translate3d(${snapped}px,0,0)`;
-    }
-    function getComputedTx(){
-      const m = getComputedStyle(track).transform;
-      if(!m || m === 'none') return 0;
-      const parts = m.match(/matrix\(([^)]+)\)/) || m.match(/matrix3d\(([^)]+)\)/);
-      if(!parts) return 0;
-      const nums = parts[1].split(',').map(parseFloat);
-      return (nums.length===6 ? nums[4] : nums[12]) || 0;
-    }
-    function wrapTx(){
-      if(setWidth <= 0) return;
-      if(tx > 0){ tx -= setWidth * Math.ceil(tx / setWidth); }
-      if(tx < -setWidth){ tx += setWidth * Math.ceil((-tx) / setWidth); }
-    }
-
-    // Reveal/hide rail on idle
-    let hideTimer = null;
-    function showRailFast(){
-      railWrap.classList.add('fast');
-      railWrap.classList.remove('is-hidden');
-      setTimeout(()=> railWrap.classList.remove('fast'), 350);
-    }
-    function scheduleHide(ms){
-      if(document.body.classList.contains('menu-open')) return;
-      if(hideTimer) clearTimeout(hideTimer);
-      hideTimer = setTimeout(()=>{ railWrap.classList.add('is-hidden'); }, ms);
-    }
-
-    // Pointer handlers
-    function startDrag(e){
-      if(uiLocked) { e?.preventDefault?.(); return; }
-      if(e.isPrimary === false) return;
-      tx = getComputedTx();
-      showRailFast();
-      document.body.classList.add('dragging');
-      isDragging = true; inertial = false;
-      lastPX = e.clientX; lastMoveTS = performance.now();
-      if(hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-      e.preventDefault();
-    }
-    function moveDrag(e){
-      if(uiLocked || !isDragging) return;
-      const now = performance.now();
-      const dx = e.clientX - lastPX;
-      tx += dx; wrapTx(); applyTransform();
-      const dt = now - lastMoveTS;
-      if(dt > 0) vel = dx / dt;
-      lastPX = e.clientX; lastMoveTS = now;
-      e.preventDefault();
-    }
-    function endDrag(e){
-      if(uiLocked || !isDragging) return;
-      isDragging = false; inertial = true; lastTime = performance.now();
-      document.body.classList.remove('dragging');
-      if(e) e.preventDefault();
-      scheduleHide(5000);
-    }
-
-    document.addEventListener('pointerdown', startDrag, {passive:false});
-    document.addEventListener('pointermove', moveDrag, {passive:false});
-    document.addEventListener('pointerup', endDrag, {passive:false});
-    document.addEventListener('pointercancel', endDrag, {passive:false});
-    document.addEventListener('pointerleave', endDrag, {passive:false});
-
-    rail.addEventListener('mouseenter', ()=>{
-      railWrap.classList.remove('is-hidden');
-      if(hideTimer) { clearTimeout(hideTimer); hideTimer = null; }
-    });
-    rail.addEventListener('mouseleave', ()=>{
-      if(!isDragging) scheduleHide(4000);
-    });
-
-    function step(ts){
-      const now = ts || performance.now();
-      if(lastTime === 0) lastTime = now;
-      const rawDt = now - lastTime;
-      dtSmooth = dtSmooth * 0.95 + rawDt * 0.05;
-      const dt = dtSmooth;
-
-      if(isDragging){
-        // position updated in moveDrag
-      } else if(inertial){
-        const target = AUTO_SPEED * AUTO_DIR;
-        const alpha = 1 - Math.exp(-dt/700);
-        vel += (target - vel) * alpha;
-        tx += vel * dt; wrapTx(); applyTransform();
-        if(Math.abs(vel - target) < 0.0008){ inertial = false; vel = target; }
-      } else {
-        vel = AUTO_SPEED * AUTO_DIR;
-        tx += vel * dt; wrapTx(); applyTransform();
-      }
-
-      const idx = computeActiveIndex();
-      const w = (setWidth / images.length) || (parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--thumb-w')) || 70);
-      const fastThreshold = w / 250;
-      const isFast = Math.abs(vel) > fastThreshold;
-
-      if(idx !== currentIdx){ currentIdx = idx; idxStableSince = now; }
-
-      if(isFast || (lastHeroRendered !== -1 && Math.abs(currentIdx - lastHeroRendered) >= 1)){
-        if(currentIdx !== lastHeroRendered){
-          updateHero(currentIdx);
-          lastHeroRendered = currentIdx;
-          lastHeroCheck = now;
-        }
-      } else {
-        const interval = (isDragging || inertial) ? heroActiveInterval : heroIdleInterval;
-        if(now - lastHeroCheck > interval && now - idxStableSince > 80 && currentIdx !== lastHeroRendered){
-          updateHero(currentIdx);
-          lastHeroRendered = currentIdx;
-          lastHeroCheck = now;
-        }
-      }
-
-      lastTime = now;
-      requestAnimationFrame(step);
-    }
-
-    /* =========================
-       MENU + PRELOADER
-    ========================= */
-    function hidePreloader(){
-      if(!pre || pre.dataset.hidden) return;
-      pre.classList.add('fade-out');
-      pre.dataset.hidden = "1";
-      setTimeout(()=>{ pre.style.display='none'; }, 1200);
-    }
-    window.addEventListener('load', ()=> setTimeout(hidePreloader, 600));
-    document.addEventListener('DOMContentLoaded', ()=> setTimeout(hidePreloader, 1800));
-    setTimeout(hidePreloader, 4000);
-
-    function setMenuState(open){
-      overlay.classList.toggle('active', open);
-      document.body.classList.toggle('menu-open', open);
-      menuIcon.classList.toggle('rotated', open);
-      uiLocked = !!open;
-      if(open){
-        try{ if(hideTimer){ clearTimeout(hideTimer); hideTimer=null; } }catch(_){}
-        railWrap.classList.add('is-hidden');
-      }else{
-        scheduleHide(5000);
-      }
-      overlay.setAttribute('aria-hidden', open ? 'false' : 'true');
-    }
-
-    function toggleMenu(e){
-      e?.stopPropagation?.();
-      e?.preventDefault?.();
-      const open = !overlay.classList.contains('active');
-      setMenuState(open);
-    }
-
-    // Bind menu interactions (icon + enlarged hit area)
-    ['click'].forEach(evt=>{
-      menuIcon.addEventListener(evt, toggleMenu, {passive:false});
-      menuHit.addEventListener(evt, toggleMenu, {passive:false});
-    });
-  
-
-    // Hide rail instantly on press to avoid brief flash before overlay
-    const hideRailInstant = (e)=>{
-      e.stopPropagation();
-      try{ if(hideTimer){ clearTimeout(hideTimer); hideTimer=null; } }catch(_){}
-      railWrap.classList.add('is-hidden');
-    };
-    ['pointerdown','touchstart','mousedown'].forEach(evt=>{
-      menuIcon.addEventListener(evt, hideRailInstant, {passive:true});
-      menuHit .addEventListener(evt, hideRailInstant, {passive:true});
-    });
-
-    // Disable vertical page scrolling (when menu closed)
-    const scrollBlock = (e)=>{ if(!document.body.classList.contains('menu-open')) e.preventDefault(); };
-    window.addEventListener('touchmove', scrollBlock, {passive:false});
-    window.addEventListener('wheel', scrollBlock, {passive:false});
-
-    // BFCache / visibility reload safeguards
-    window.addEventListener('pageshow', (e)=>{ if(e.persisted) setTimeout(()=>location.reload(), 50); }, {passive:true});
-    document.addEventListener('visibilitychange', ()=>{
-      if(document.visibilityState === 'hidden'){
-        sessionStorage.setItem('wasHidden','1');
-      } else if (document.visibilityState === 'visible' && sessionStorage.getItem('wasHidden') === '1'){
-        sessionStorage.removeItem('wasHidden'); setTimeout(()=>location.reload(), 50);
-      }
-    }, {passive:true});
-    window.addEventListener('focus', ()=>{
-      if(sessionStorage.getItem('wasHidden') === '1'){
-        sessionStorage.removeItem('wasHidden'); setTimeout(()=>location.reload(), 50);
-      }
-    }, {passive:true});
-
-    /* =========================
-       BOOT
-    ========================= */
-    function selfTest(){
-      console.groupCollapsed('carousel self-test');
-      console.assert(images.length > 0, 'images array is empty');
-      console.assert(track.querySelectorAll('.set').length === 3, 'expected 3 duplicated sets');
-      console.assert(document.querySelectorAll('.thumb').length === images.length*3, 'thumb count mismatch');
-      const startLeft = track.getBoundingClientRect().left;
-      setTimeout(()=>{
-        const moved = track.getBoundingClientRect().left !== startLeft;
-        console.assert(moved, 'autoplay transform did not move track');
-        console.assert(typeof scheduleHide === 'function', 'scheduleHide is not defined');
-        console.groupEnd();
-      }, 1200);
-    }
-
-    window.addEventListener('load', async ()=>{
-      await loadImagesFromJSON();
-      buildAllSets();
-      tx = 0; applyTransform(); updateHero(computeActiveIndex());
-      requestAnimationFrame(step);
-      selfTest();
-      scheduleHide(5000);
-    });
-
-    window.addEventListener('resize', ()=>{
-      const prev = setWidth;
-      measure();
-      if(prev !== setWidth){
-        applyTransform();
-        updateHero(computeActiveIndex());
-      }
-    });
-  })();
-  </script>
+  <script src="script.js"></script>
 </body>
 </html>
